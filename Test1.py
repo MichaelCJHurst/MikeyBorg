@@ -50,9 +50,13 @@ def PerformMove(driveLeft, driveRight, numSeconds):
 
 print("Testing moving forwards:")
 PerformMove(+1.0, +1.0, 2)
+time.sleep(1)
 print("Testing moving backwards:")
 PerformMove(-1.0, -1.0, 2)
+time.sleep(1)
 print("Testing moving left:")
 PerformMove(+1.0, -1.0, 2)
+time.sleep(1)
 print("Testing moving right:")
 PerformMove(-1.0, +1.0, 2)
+time.sleep(1)
