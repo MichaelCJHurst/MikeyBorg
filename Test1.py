@@ -46,6 +46,14 @@ else:
 	maxPower = voltageOut / float(voltageIn)
 #	Input refresh interval, so it can be controlled >:)
 interval = 0.01
+#	Variables for motor speeds
+leftMotors = 0
+rightMotors = 0
+
+#	If debugging or not
+global debug
+#debug = True
+debug = False
 
 #	Setup pygame and key states
 print("Initialising pygame and key states")
@@ -61,7 +69,6 @@ moveDown = False
 moveLeft = False
 moveRight = False
 moveQuit = False
-pygame.init()
 screen = pygame.display.set_mode([300, 300])
 pygame.display.set_caption("Press [ESC] to quit")
 
@@ -108,8 +115,8 @@ def PygameHandler(events):
 			elif event.key == pygame.K_ESCAPE:
 				moveQuit = False
 
-#	Generic Movement
-def PerformMove(driveLeft, driveRight, numSeconds):
+#	Testing Movement
+def TestMove(driveLeft, driveRight, numSeconds):
 	#	set the motors running
 	PBR.SetMotor1(driveRight * maxPower)
 	PBR.SetMotor2(-driveLeft * maxPower)
@@ -117,25 +124,37 @@ def PerformMove(driveLeft, driveRight, numSeconds):
 	time.sleep(numSeconds)
 	#	turn off the motors
 	PBR.MotorsOff()
-print("======================================")
-print("Initialisation complete, running tests")
-print("======================================")
-print("Testing moving forwards:")
-PerformMove(+1.0, +1.0, 2)
-time.sleep(0.25)
-print("Testing moving backwards:")
-PerformMove(-1.0, -1.0, 2)
-time.sleep(0.25)
-print("Testing moving left:")
-PerformMove(+1.0, -1.0, 2)
-time.sleep(0.25)
-print("Testing moving right:")
-PerformMove(-1.0, +1.0, 2)
-time.sleep(0.25)
-print("======================================")
-print("Testing complete, awaiting input")
-print("Press [ESC] to quit")
-print("======================================")
+#	Setting speeds
+def SetSpeed(driveLeft, driveRight):
+	PBR.SetMotor1(driveRight * maxPower)
+	PBR.SetMotor2(-driveLeft * maxPower)
+#	If debugging, run tests
+if debug == True:
+	print("======================================")
+	print("Initialisation complete, running tests")
+	print("======================================")
+	print("Testing moving forwards:")
+	TestMove(+1.0, +1.0, 2)
+	time.sleep(0.25)
+	print("Testing moving backwards:")
+	TestMove(-1.0, -1.0, 2)
+	time.sleep(0.25)
+	print("Testing moving left:")
+	TestMove(+1.0, -1.0, 2)
+	time.sleep(0.25)
+	print("Testing moving right:")
+	TestMove(-1.0, +1.0, 2)
+	time.sleep(0.25)
+	print("======================================")
+	print("Testing complete, awaiting input")
+	print("Press [ESC] to quit")
+	print("======================================")
+#	If not debugging, just wait for input
+else:
+	print("======================================")
+	print("Initialisation complete, awaiting input")
+	print("Press [ESC] to quit")
+	print("======================================")
 
 try:
 	#	Loop forevermore, unless ESC pressed
@@ -145,23 +164,41 @@ try:
 		#	If something has changed since last iteration, do something
 		if hadEvent:
 			hadEvent = False
+			#	If ESC was clicked
 			if moveQuit:
 				print("[ESC] clicked, terminating program")
-				break;
-			elif moveLeft:
-				PBR.SetMotor1(+maxPower)
-				PBR.SetMotor2(+maxPower)
-			elif moveRight:
-				PBR.SetMotor1(-maxPower)
-				PBR.SetMotor2(-maxPower)
+				break
+			#	If going forwards
 			elif moveUp:
-				PBR.SetMotor1(+maxPower)
-				PBR.SetMotor2(-maxPower)
+				#	If also going left
+				if moveLeft == True and moveRight == False:
+					SetSpeed(0.2, 1.0)
+				#	If also going right
+				elif moveLeft == False and moveRight == True:
+					SetSpeed(1.0, 0.2)
+				#	If just going forward
+				else:
+					SetSpeed(1.0, 1.0)
+			#	If going backwards
 			elif moveDown:
-				PBR.SetMotor1(-maxPower)
-				PBR.SetMotor2(+maxPower)
+				#	If also going left
+				if moveLeft == True and moveRight == False:
+					SetSpeed(-1, -0.2)
+				#	If also going right
+				elif moveLeft == False and moveRight == True:
+					SetSpeed(-0.2, -1)
+				#	If just going backwards
+				else:
+					SetSpeed(-1, -1)
+			#	If going left
+			elif moveLeft:
+				#	Turn left, if not also going right
+				if moveRight == False:
+					SetSpeed(-1.0, 1.0)
+			#	If going right
+			elif moveRight:
+				SetSpeed(1.0, -1.0)
 			else:
-				#	No key pressed, stop motors
 				PBR.MotorsOff()
 		#	Wait for the interval
 		time.sleep(interval)
