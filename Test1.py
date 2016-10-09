@@ -7,12 +7,14 @@ print("Importing Libraries")
 #   Import libraries
 import PicoBorgRev3 as PicoBorgRev
 import pygame
+import picamera
+import io
+import picamera.array
 import time
 import math
 import sys
 import os
 print("Imported Libraries")
-
 print("Setting up reverse")
 #   set-up reverse
 PBR = PicoBorgRev.PicoBorgRev()
@@ -49,14 +51,12 @@ interval = 0.01
 #	Variables for motor speeds
 leftMotors = 0
 rightMotors = 0
-
 #	If debugging or not
 global debug
 #debug = True
 debug = False
-
 #	Setup pygame and key states
-print("Initialising pygame and key states")
+print("Initialising key states")
 global hadEvent
 global moveUp
 global moveDown
@@ -69,8 +69,24 @@ moveDown = False
 moveLeft = False
 moveRight = False
 moveQuit = False
-screen = pygame.display.set_mode([300, 300])
-pygame.display.set_caption("Press [ESC] to quit")
+screenWidth = 300
+screenHeight = 300
+black = pygame.Color(0, 0, 0)
+#screen = pygame.display.set_mode([300, 300])
+#pygame.display.set_caption("Press [ESC] to quit")
+print("Initialising camera")
+camera = picamera.PiCamera()
+camera.vflip = False
+camera.hflip = False
+camera.brightness = 60
+camera.resolution = (screenWidth, screenHeight)
+camera.framerate = 24
+camera.start_preview()
+rgb = bytearray(camera.resolution[0] * camera.resolution[1] * 3)
+print("Initialising screen")
+pygame.init()
+screen = pygame.display.set_mode([screenWidth, screenHeight])
+screen.fill(black)
 
 print("Defining functions")
 #	Function to handle events
@@ -159,6 +175,16 @@ else:
 try:
 	#	Loop forevermore, unless ESC pressed
 	while True:
+		#	Camera stuff
+		stream = io.BytesIO()
+		camera.capture(stream, use_video_port=True, format="rgb", resize=(screenWidth, screenHeight))
+		stream.seek(0)
+		stream.readinto(rgb)
+		stream.close()
+
+		img = pygame.image.frombuffer(rgb[0:(320 * 240 * 3)], [320, 240], "RGB")
+		screen.blit(img, (0, 0))
+		pygame.display.update()
 		#	Get the currently pressed keys
 		PygameHandler(pygame.event.get())
 		#	If something has changed since last iteration, do something
