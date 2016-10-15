@@ -13,9 +13,7 @@ print("Importing Libraries")
 #   Import libraries
 import PicoBorgRev3 as PicoBorgRev
 import pygame
-#import picamera
-import pygame.camera
-from pygame.locals import *
+import picamera
 import io
 import time
 import os
@@ -35,7 +33,6 @@ if not PBR.foundChip:
 		for board in boards:
 			print("	%02X (%d)" (board, board))
 		print("To change the board, add PBR.i2cAddress = 0x%02X" % (boards[0]))
-		
 		sys.exit()
 #	enable communications failsafe
 print("Enabling communications failsafe")
@@ -71,7 +68,7 @@ moveRight = False
 moveQuit = False
 streamLength = screenWidth * screenHeight * 3
 black = pygame.Color(0, 0, 0)
-print("Initialising camera")
+#print("Initialising camera")
 #camera = picamera.PiCamera()
 #camera.vflip = False
 #camera.hflip = False
@@ -82,7 +79,6 @@ print("Initialising camera")
 #rgb = bytearray(camera.resolution[0] * camera.resolution[1] * 3)
 print("Initialising screen")
 pygame.init()
-pygame.camera.init()
 screen = pygame.display.set_mode([screenWidth, screenHeight])
 pygame.display.set_caption("Press [ESC] to quit")
 screen.fill(black)
@@ -170,18 +166,11 @@ else:
 	print("Initialisation complete, awaiting input")
 	print("Press [ESC] to quit")
 	print("======================================")
-cam = pygame.camera.Camera("/dev/video0", [screenWidth, screenHeight], "RGM")
-cam.start()
-image = cam.get_image()
+
 try:
 	#	Loop forevermore, unless ESC pressed
 	while True:
 		#	Camera stuff
-		#       If image is ready, use it
-		if cam.query_image():
-                        image = cam.get_image()
-                        #       Set image as background
-                        screen.blit(image, [0, 0])
 		#stream = io.BytesIO()
 		#camera.capture(stream, use_video_port=True, format="rgb", resize=(screenWidth, screenHeight))
 		#stream.seek(0)
@@ -192,7 +181,7 @@ try:
 		#stream.close()
 		#img = pygame.image.frombuffer(rgb[0:(streamLength)], [screenWidth, screenHeight], "RGB")
 		#screen.blit(img, (0, 0))
-		pygame.display.update()
+		#pygame.display.update()
 		#	Get the currently pressed keys
 		PygameHandler(pygame.event.get())
 		#	If something has changed since last iteration, do something
