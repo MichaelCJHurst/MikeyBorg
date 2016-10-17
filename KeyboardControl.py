@@ -13,7 +13,7 @@ print("Importing Libraries")
 #   Import libraries
 import PicoBorgRev3 as PicoBorgRev
 import pygame
-import threading
+from multiprocessing import Process
 import pygame.camera
 from pygame.locals import *
 import io
@@ -83,15 +83,7 @@ screen = pygame.display.set_mode([screenWidth, screenHeight])
 pygame.display.set_caption("Press [ESC] to quit")
 screen.fill(black)
 
-print("Defining Camera class")
-class CameraClass(threading.Thread):
-	def __init__(self, threadID, name, counter):
-		threading.Thread.__init__(self)
-		self.threadID = threadID
-		self.name = name
-		self.counter = counter
-	
-	def run(self):
+def UpdateImage():
 		while True:
 			#	If an image is ready, use it
 			if cam.query_image():
@@ -101,15 +93,7 @@ class CameraClass(threading.Thread):
 				pygame.display.update()
 				time.sleep(interval)
 
-print("Defining Event class")
-class EventClass(threading.Thread):
-	def __init__(self, threadID, name, counter):
-		threading.Thread.__init__(self)
-		self.threadID = threadID
-		self.name = name
-		self.counter = counter
-	
-	def run(self):
+def CheckEvent():
 		while True:
 		#	Variables accessible outside this function
 			global hadEvent
@@ -204,11 +188,13 @@ print("Initialisation complete, awaiting input")
 print("Press [ESC] to quit")
 print("======================================")
 
-cameraThread = CameraClass(1, "Camera", 1)
-eventThread  = EventClass(2,  "Event",  1)
+imageProcess = Process(target=UpdateImage)
+eventProcess = Process(target=CheckEvent)
 
-cameraThread.start()
-eventThread.start()
+imageProcess.start()
+eventProcess.start()
+imageProcess.join()
+eventProcess.join()
 
 #PBR.MotorsOff()
 #print("Program Finished")
