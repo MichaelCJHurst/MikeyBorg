@@ -5,6 +5,8 @@ debug = False
 interval = 0.01
 screenWidth = 512
 screenHeight = 512
+imageWidth = 240
+imageHeight = 180
 #	Start program
 print("======================================")
 print("Running Test One for MikeyBorg")
@@ -170,7 +172,7 @@ else:
 	print("Initialisation complete, awaiting input")
 	print("Press [ESC] to quit")
 	print("======================================")
-cam = pygame.camera.Camera("/dev/video0", [screenWidth, screenHeight], "RGM")
+cam = pygame.camera.Camera("/dev/video0", [imageWidth, imageHeight], "RGM")
 cam.start()
 image = cam.get_image()
 try:
@@ -180,7 +182,8 @@ try:
 		#       If image is ready, use it
 		if cam.query_image():
                         image = cam.get_image()
-                        #       Set image as background
+                        image = pygame.transform.scale(image, [480, 360])
+						#       Set image as background
                         screen.blit(image, [0, 0])
 		#stream = io.BytesIO()
 		#camera.capture(stream, use_video_port=True, format="rgb", resize=(screenWidth, screenHeight))
