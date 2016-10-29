@@ -111,7 +111,7 @@ def PygameHandler(events):
 				moveLeft = True
 			elif event.key == pygame.K_d:
 				moveRight = True
-			elif event.key == pygame.K_ESCAPE:
+			elif event.key == pygame.K_r:
 				moveQuit = True
 		#	Else check if this is a key release
 		elif event.type == pygame.KEYUP:
@@ -124,7 +124,7 @@ def PygameHandler(events):
 				moveLeft = False
 			elif event.key == pygame.K_d:
 				moveRight = False
-			elif event.key == pygame.K_LSHIFT:
+			elif event.key == pygame.K_r:
 				if showCam:
 					cam.stop()
 					showCam = False
