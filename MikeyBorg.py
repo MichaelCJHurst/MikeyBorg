@@ -61,13 +61,15 @@ global moveLeft
 global moveRight
 global moveQuit
 global showCam
-hadEvent  = True
-moveUp    = False
-moveDown  = False
-moveLeft  = False
-moveRight = False
-moveQuit  = False
-showCam   = True
+global speedMultiplier
+hadEvent        = True
+moveUp          = False
+moveDown        = False
+moveLeft        = False
+moveRight       = False
+moveQuit        = False
+showCam         = True
+speedMultiplier = 1
 #	Set the colours
 black = pygame.Color(0, 0, 0)
 grey  = pygame.Color(100, 100, 100)
@@ -94,6 +96,7 @@ def PygameHandler(events):
 	global moveRight
 	global moveQuit
 	global showCam
+	global speedMultiplier
 	#	Handle each event individually
 	for event in events:
 		#	If ESC pressed, quit
@@ -111,8 +114,10 @@ def PygameHandler(events):
 				moveLeft = True
 			elif event.key == pygame.K_d:
 				moveRight = True
-			elif event.key == pygame.K_r:
+			elif event.key == pygame.K_ESCAPE:
 				moveQuit = True
+			elif event.key == pygame.K_LSHIFT:
+				speedMultiplier = 0.5
 		#	Else check if this is a key release
 		elif event.type == pygame.KEYUP:
 			hadEvent = True
@@ -132,13 +137,13 @@ def PygameHandler(events):
 					cam.start()
 					image = cam.get_image()
 					showCam = True
-			elif event.key == pygame.K_ESCAPE:
-				moveQuit = False
-
+			elif event.key == pygame.K_LSHIFT:
+				speedMultiplier = 1
 #	Setting speeds
 def SetSpeed(driveLeft, driveRight):
-	PBR.SetMotor1(driveRight * maxPower)
-	PBR.SetMotor2(-driveLeft * maxPower)
+	global speedMultiplier
+	PBR.SetMotor1(driveRight * maxPower * speedMultiplier)
+	PBR.SetMotor2(-driveLeft * maxPower * speedMultiplier)
 
 #	Initialization done, so say so
 print("======================================")
