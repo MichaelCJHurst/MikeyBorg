@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 # coding: Latin-1
 #	Configurable variables
-debug = False
-interval = 0.01
-screenWidth = 800
-screenHeight = 480
-imageWidth = 240
-imageHeight = 180
+debug         = False
+interval      = 0.01
+screenWidth   = 800
+screenHeight  = 480
+imageWidth    = 240 #	Needs to be at least half of the screenWidth
+imageHeight   = 180 #	Needs to be at least half of the screenHeight
+#	Variables defined using above configurable variables
+displayWidth  = imageWidth * 2
+displayHeight = imageHeight * 2
+imageX        = (screenWidth - displayWidth) / 2
+imageY        = 20
 #	Start program
 print("======================================")
 print("Running Test One for MikeyBorg")
@@ -15,13 +20,7 @@ print("Importing Libraries")
 #   Import libraries
 import PicoBorgRev3 as PicoBorgRev
 import pygame
-#import picamera
 import pygame.camera
-from pygame.locals import *
-import io
-import time
-import os
-from PIL import Image
 print("Imported Libraries")
 print("Setting up reverse")
 #   set-up reverse
@@ -37,15 +36,11 @@ if not PBR.foundChip:
 		for board in boards:
 			print("	%02X (%d)" (board, board))
 		print("To change the board, add PBR.i2cAddress = 0x%02X" % (boards[0]))
-		
 		sys.exit()
 #	enable communications failsafe
 print("Enabling communications failsafe")
 PBR.ResetEpo()
 print("Setting movement settings")
-#	Movement Settings
-timeForward1m = 5.7
-timeSpin360 = 4.8
 #	Power Settings
 voltageIn = 12.0
 voltageOut = 6.0
@@ -55,7 +50,7 @@ if voltageOut > voltageIn:
 else:
 	maxPower = voltageOut / float(voltageIn)
 #	Variables for motor speeds
-leftMotors = 0
+leftMotors  = 0
 rightMotors = 0
 #	Setup pygame and key states
 print("Initialising key states")
@@ -65,30 +60,29 @@ global moveDown
 global moveLeft
 global moveRight
 global moveQuit
-hadEvent = True
-moveUp = False
-moveDown = False
-moveLeft = False
+global showCam
+hadEvent  = True
+moveUp    = False
+moveDown  = False
+moveLeft  = False
 moveRight = False
-moveQuit = False
-streamLength = screenWidth * screenHeight * 3
+moveQuit  = False
+showCam   = True
+#	Set the colours
 black = pygame.Color(0, 0, 0)
-print("Initialising camera")
-#camera = picamera.PiCamera()
-#camera.vflip = False
-#camera.hflip = False
-#camera.brightness = 60
-#camera.resolution = (screenWidth, screenHeight)
-#camera.framerate = 24
-#camera.start_preview()
-#rgb = bytearray(camera.resolution[0] * camera.resolution[1] * 3)
+grey  = pygame.Color(100, 100, 100)
 print("Initialising screen")
 pygame.init()
-pygame.camera.init()
-screen = pygame.display.set_mode([screenWidth, screenHeight])
 pygame.display.set_caption("Press [ESC] to quit")
-screen.fill(black)
-
+screen = pygame.display.set_mode([screenWidth, screenHeight])
+screen.fill(grey)
+#	Draw 'border' around the image
+pygame.draw.rect(screen, black, (imageX - 5, imageY - 5, displayWidth + 10, displayHeight + 10))
+print("Initialising camera")
+pygame.camera.init()
+cam = pygame.camera.Camera("/dev/video0", [imageWidth, imageHeight], "RGM")
+cam.start()
+image = cam.get_image()
 print("Defining functions")
 #	Function to handle events
 def PygameHandler(events):
@@ -99,6 +93,7 @@ def PygameHandler(events):
 	global moveLeft
 	global moveRight
 	global moveQuit
+	global showCam
 	#	Handle each event individually
 	for event in events:
 		#	If ESC pressed, quit
@@ -129,72 +124,37 @@ def PygameHandler(events):
 				moveLeft = False
 			elif event.key == pygame.K_RIGHT:
 				moveRight = False
+			elif event.key == pygame.K_LSHIFT:
+				if showCam:
+					cam.stop()
+					showCam = False
+				else:
+					cam.start()
+					image = cam.get_image()
+					showCam = True
 			elif event.key == pygame.K_ESCAPE:
 				moveQuit = False
 
-#	Testing Movement
-def TestMove(driveLeft, driveRight, numSeconds):
-	#	set the motors running
-	PBR.SetMotor1(driveRight * maxPower)
-	PBR.SetMotor2(-driveLeft * maxPower)
-	#	wait for the time specified
-	time.sleep(numSeconds)
-	#	turn off the motors
-	PBR.MotorsOff()
 #	Setting speeds
 def SetSpeed(driveLeft, driveRight):
 	PBR.SetMotor1(driveRight * maxPower)
 	PBR.SetMotor2(-driveLeft * maxPower)
-#	If debugging, run tests
-if debug == True:
-	print("======================================")
-	print("Initialisation complete, running tests")
-	print("======================================")
-	print("Testing moving forwards:")
-	TestMove(+1.0, +1.0, 2)
-	time.sleep(0.25)
-	print("Testing moving backwards:")
-	TestMove(-1.0, -1.0, 2)
-	time.sleep(0.25)
-	print("Testing moving left:")
-	TestMove(+1.0, -1.0, 2)
-	time.sleep(0.25)
-	print("Testing moving right:")
-	TestMove(-1.0, +1.0, 2)
-	time.sleep(0.25)
-	print("======================================")
-	print("Testing complete, awaiting input")
-	print("Press [ESC] to quit")
-	print("======================================")
-#	If not debugging, just wait for input
-else:
-	print("======================================")
-	print("Initialisation complete, awaiting input")
-	print("Press [ESC] to quit")
-	print("======================================")
-cam = pygame.camera.Camera("/dev/video0", [imageWidth, imageHeight], "RGM")
-cam.start()
-image = cam.get_image()
+
+#	Initialization done, so say so
+print("======================================")
+print("Initialisation complete, awaiting input")
+print("Press [ESC] to quit")
+print("======================================")
 try:
 	#	Loop forevermore, unless ESC pressed
 	while True:
 		#	Camera stuff
 		#       If image is ready, use it
-		if cam.query_image():
-                        image = cam.get_image()
-                        image = pygame.transform.scale(image, [480, 360])
-						#       Set image as background
-                        screen.blit(image, [160, 0])
-		#stream = io.BytesIO()
-		#camera.capture(stream, use_video_port=True, format="rgb", resize=(screenWidth, screenHeight))
-		#stream.seek(0)
-		#stream.readinto(rgb)
-		#stream.close()
-
-		#img = pygame.image.frombuffer(stream, [screenWidth, screenHeight], "RGB")
-		#stream.close()
-		#img = pygame.image.frombuffer(rgb[0:(streamLength)], [screenWidth, screenHeight], "RGB")
-		#screen.blit(img, (0, 0))
+		if showCam and cam.query_image():
+			image = cam.get_image()
+			image = pygame.transform.scale(image, [displayWidth, displayHeight])
+			#       Set image as background
+			screen.blit(image, [imageX, imageY])
 		pygame.display.update()
 		#	Get the currently pressed keys
 		PygameHandler(pygame.event.get())
