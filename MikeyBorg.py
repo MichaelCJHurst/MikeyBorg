@@ -103,26 +103,26 @@ def PygameHandler(events):
 		#	Else check if this is a key press
 		elif event.type == pygame.KEYDOWN:
 			hadEvent = True
-			if event.key == pygame.K_UP:
+			if event.key == pygame.K_w:
 				moveUp = True
-			elif event.key == pygame.K_DOWN:
+			elif event.key == pygame.K_s:
 				moveDown = True
-			elif event.key == pygame.K_LEFT:
+			elif event.key == pygame.K_a:
 				moveLeft = True
-			elif event.key == pygame.K_RIGHT:
+			elif event.key == pygame.K_d:
 				moveRight = True
 			elif event.key == pygame.K_ESCAPE:
 				moveQuit = True
 		#	Else check if this is a key release
 		elif event.type == pygame.KEYUP:
 			hadEvent = True
-			if event.key == pygame.K_UP:
+			if event.key == pygame.K_w:
 				moveUp = False
-			elif event.key == pygame.K_DOWN:
+			elif event.key == pygame.K_s:
 				moveDown = False
-			elif event.key == pygame.K_LEFT:
+			elif event.key == pygame.K_a:
 				moveLeft = False
-			elif event.key == pygame.K_RIGHT:
+			elif event.key == pygame.K_d:
 				moveRight = False
 			elif event.key == pygame.K_LSHIFT:
 				if showCam:
