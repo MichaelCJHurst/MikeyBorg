@@ -83,12 +83,15 @@ pygame.init()
 pygame.display.set_caption("Press [ESC] to quit")
 screen = pygame.display.set_mode([screenWidth, screenHeight])
 screen.fill(background)
+#	Font initialisation
+monospaceFont = pygame.font.SysFont("monospace", 15)
 #	Draw 'border' around the image
 pygame.draw.rect(screen, black, (imageX - 5, imageY - 5, displayWidth + 10, displayHeight + 10))
 #	Draw message bar
-pygame.draw.rect(screen, messageBar, (imageX - 5, imageY + 5 + displayHeight, 10, 10))
+pygame.draw.rect(screen, messageBar, (imageX - 5, imageY + 5 + displayHeight, displayWidth + 10, 20))
 print("Initialising camera")
 pygame.camera.init()
+cam = pygame.camera.Camera("/dev/video0", [imageWidth, imageHeight], "RGM")
 cam.start()
 image = cam.get_image()
 print("Defining functions")
@@ -154,7 +157,9 @@ def SetSpeed(driveLeft, driveRight):
 	PBR.SetMotor1(driveRight * maxPower * speedMultiplier)
 	PBR.SetMotor2(-driveLeft * maxPower * speedMultiplier)
 #	Displaying a message
-
+def DisplayMessage(message):
+	message = monospaceFont.render(message, 1, black)
+	screen.blit(message, (imageX, imageY + 10 + displayHeight))
 #	Initialization done, so say so
 print("======================================")
 print("Initialisation complete, awaiting input")
@@ -173,7 +178,7 @@ try:
 			if saveImage:
 				filename = imagePath + strftime("%Y%m%d-%H%M%S", gmtime()) + ".jpg"
 				pygame.image.save(cam.get_image(), filename)
-				showMessage("Saved picture to " + filename)
+				DisplayMessage("Saved picture to " + filename)
 		else:
 			saveImage = False
 		pygame.display.update()
