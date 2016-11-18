@@ -7,6 +7,7 @@ screenWidth   = 800
 screenHeight  = 480
 imageWidth    = 240 #	Needs to be at least half of the screenWidth
 imageHeight   = 180 #	Needs to be at least half of the screenHeight
+imagePath     = "SavedImages/"
 #	Variables defined using above configurable variables
 displayWidth  = imageWidth * 2
 displayHeight = imageHeight * 2
@@ -21,6 +22,7 @@ print("Importing Libraries")
 import PicoBorgRev3 as PicoBorgRev
 import pygame
 import pygame.camera
+from time import strftime, gmtime
 print("Imported Libraries")
 print("Setting up reverse")
 #   set-up reverse
@@ -61,6 +63,7 @@ global moveLeft
 global moveRight
 global moveQuit
 global showCam
+global saveImage
 global speedMultiplier
 hadEvent        = True
 moveUp          = False
@@ -69,20 +72,23 @@ moveLeft        = False
 moveRight       = False
 moveQuit        = False
 showCam         = True
+saveImage       = False
 speedMultiplier = 1
 #	Set the colours
-black = pygame.Color(0, 0, 0)
-grey  = pygame.Color(100, 100, 100)
+black      = pygame.Color(0, 0, 0)
+messageBar = pygame.Color(119, 136, 153)
+background = pygame.Color(211, 211, 211)
 print("Initialising screen")
 pygame.init()
 pygame.display.set_caption("Press [ESC] to quit")
 screen = pygame.display.set_mode([screenWidth, screenHeight])
-screen.fill(grey)
+screen.fill(background)
 #	Draw 'border' around the image
 pygame.draw.rect(screen, black, (imageX - 5, imageY - 5, displayWidth + 10, displayHeight + 10))
+#	Draw message bar
+pygame.draw.rect(screen, messageBar, (imageX - 5, imageY + 5 + displayHeight, 10, 10))
 print("Initialising camera")
 pygame.camera.init()
-cam = pygame.camera.Camera("/dev/video0", [imageWidth, imageHeight], "RGM")
 cam.start()
 image = cam.get_image()
 print("Defining functions")
@@ -96,6 +102,7 @@ def PygameHandler(events):
 	global moveRight
 	global moveQuit
 	global showCam
+	global saveImage
 	global speedMultiplier
 	#	Handle each event individually
 	for event in events:
@@ -139,11 +146,14 @@ def PygameHandler(events):
 					showCam = True
 			elif event.key == pygame.K_LSHIFT:
 				speedMultiplier = 1
+			elif event.key == pygame.K_SPACE:
+				saveImage = True
 #	Setting speeds
 def SetSpeed(driveLeft, driveRight):
 	global speedMultiplier
 	PBR.SetMotor1(driveRight * maxPower * speedMultiplier)
 	PBR.SetMotor2(-driveLeft * maxPower * speedMultiplier)
+#	Displaying a message
 
 #	Initialization done, so say so
 print("======================================")
@@ -160,6 +170,12 @@ try:
 			image = pygame.transform.scale(image, [displayWidth, displayHeight])
 			#       Set image as background
 			screen.blit(image, [imageX, imageY])
+			if saveImage:
+				filename = imagePath + strftime("%Y%m%d-%H%M%S", gmtime()) + ".jpg"
+				pygame.image.save(cam.get_image(), filename)
+				showMessage("Saved picture to " + filename)
+		else:
+			saveImage = False
 		pygame.display.update()
 		#	Get the currently pressed keys
 		PygameHandler(pygame.event.get())
