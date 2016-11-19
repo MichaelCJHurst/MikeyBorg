@@ -19,7 +19,7 @@ print("Running Test One for MikeyBorg")
 print("======================================")
 print("Importing Libraries")
 #   Import libraries
-import PicoBorgRev3 as PicoBorgRev
+from Classes import PicoBorgRev3 as PicoBorgRev
 import pygame
 import pygame.camera
 from time import strftime, gmtime
