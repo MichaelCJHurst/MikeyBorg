@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: Latin-1
-import pygame
-from   Classes import PicoBorgRev3 as PiBorgRev
+from Classes import PicoBorgRev3 as PiBorgRev
 
 class MikeyBorg:
 	
