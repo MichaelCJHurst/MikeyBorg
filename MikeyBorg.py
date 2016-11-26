@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 # coding: Latin-1
-#	Configurable variables
-screenWidth   = 800
-screenHeight  = 480
-imageWidth    = 240 #	Needs to be at least half of the screenWidth
-imageHeight   = 180 #	Needs to be at least half of the screenHeight
-imagePath     = "SavedImages/"
-#	Variables defined using above configurable variables
-displayWidth  = imageWidth  * 2
-displayHeight = imageHeight * 2
-imageX        = (screenWidth - displayWidth) / 2
-imageY        = 20
 
 import pygame
 from   Classes         import MikeyBorgClass
 from   Classes         import MikeyCamClass
 from   multiprocessing import Process, Value
+from   configparser    import SafeConfigParser
+
+#	Read the settings from the config file
+config = SafeConfigParser()
+config.read("MikeyBorg.ini")
+screenWidth   = int(config.get("screen", "width"))
+screenHeight  = int(config.get("screen", "height"))
+imageWidth    = int(config.get("image",  "width"))
+imageHeight   = int(config.get("image",  "height"))
+imagePath     = config.get("image", "path")
+#	Variables defined using above configurable variables
+displayWidth  = imageWidth  * 2
+displayHeight = imageHeight * 2
+imageX        = (screenWidth - displayWidth) / 2
+imageY        = 20
 
 #	Set the colours
 black      = pygame.Color(0, 0, 0)
