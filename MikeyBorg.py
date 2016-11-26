@@ -38,16 +38,30 @@ pygame.draw.rect(screen, black, (imageX - 5, imageY - 5, displayWidth + 10, disp
 pygame.draw.rect(screen, messageBar, (imageX - 5, imageY + 5 + displayHeight, displayWidth + 10, 20))
 pygame.display.update()
 
-MikeyCam  = MikeyCamClass.MikeyCam(screen, [imageWidth, imageHeight], [imageX, imageY], [displayWidth, displayHeight])
+MikeyCam  = MikeyCamClass.MikeyCam([imageWidth, imageHeight])
 MikeyBorg = MikeyBorgClass.MikeyBorg()
 closeNow  = Value("b", 0)
+#	Function used to update the display
+def displayLoop(MikeyCam, close):
+		try:
+			while True:
+				image = MikeyCam.getImage([displayWidth, displayHeight])
+				screen.blit(image, [imageX, imageY])
+				pygame.display.update()
+				if close.value == 1:
+					break
+			MikeyCam.stop()
+			print("Camera Stopped")
+		except KeyboardInterrupt:
+			MikeyCam.stop()
+			print("Camera Killed")
 
-MikeyCamProcess  = Process(target=MikeyCam.loop,  args=(closeNow,))
+displayProcess  = Process(target=displayLoop,  args=(MikeyCam, closeNow,))
 MikeyBorgProcess = Process(target=MikeyBorg.loop, args=(closeNow,))
-MikeyCamProcess.start()
+displayProcess.start()
 MikeyBorgProcess.start()
 
-MikeyCamProcess.join()
+displayProcess.join()
 MikeyBorgProcess.join()
 print("Program Finished")
 print("======================================")

@@ -5,36 +5,33 @@ import pygame.camera
 
 class MikeyCam:
 		
-	def __init__(self, screen, imageSize, imagePosition, displaySize):
-		self.screen        = screen
-		self.imageSize     = imageSize
-		self.imagePosition = imagePosition
-		self.displaySize   = displaySize
-		self.takePicture   = False
-		self.imagePath     = "SavedImages/"
+	def __init__(self, imageSize):
+		self.isActive = False
 
 		pygame.camera.init()
 		self.cam = pygame.camera.Camera("/dev/video0", imageSize, "RGM")
-		self.cam.start()
-		self._getImage()
-		pygame.display.update()
-		print("Camera Initialised")
+		self.start()
 
-	def loop(self, close):
-		try:
-			while True:
-				self._getImage()
-				if close.value == 1:
-					break
-			self.cam.stop()
-			print("Camera Stopped")
-		except KeyboardInterrupt:
-			self.cam.stop()
-			print("Camera Killed")
-
-	def _getImage(self):
+	def getImage(self, imageSize):
 		image = self.cam.get_image()
-		image = pygame.transform.scale(image, self.displaySize)
-		self.screen.blit(image, self.imagePosition)
-		pygame.display.update()
+		image = pygame.transform.scale(image, imageSize)
+		return image
+	
+	def toggle(self):
+		if self.isActive:
+			self.stop()
+		else:
+			self.start()
+		return
+	
+	def start(self):
+		if not self.isActive:
+			self.cam.start()
+			self.isActive = True
+		return
+	
+	def stop(self):
+		if self.isActive:
+			self.cam.stop()
+			self.isActive = False
 		return
