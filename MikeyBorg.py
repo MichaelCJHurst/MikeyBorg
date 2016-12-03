@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: Latin-1
-
 import pygame
 from   Classes         import InputsClass
 from   Classes         import MikeyBorgClass
 from   Classes         import MikeyCamClass
+from   Classes         import MikeyBorgUIClass
 from   configparser    import SafeConfigParser
 from   multiprocessing import Process, Value
 
@@ -21,24 +21,8 @@ displayWidth  = imageWidth  * 2
 displayHeight = imageHeight * 2
 imageX        = (screenWidth - displayWidth) / 2
 imageY        = 20
-
-#	Set the colours
-black      = pygame.Color(0, 0, 0)
-messageBar = pygame.Color(119, 136, 153)
-background = pygame.Color(211, 211, 211)
-print("Initialising screen")
-pygame.init()
-pygame.display.set_caption("Press [ESC] to quit")
-screen = pygame.display.set_mode([screenWidth, screenHeight])
-screen.fill(background)
-#	Font initialisation
-monospaceFont = pygame.font.SysFont("monospace", 15)
-#	Draw 'border' around the image
-pygame.draw.rect(screen, black, (imageX - 5, imageY - 5, displayWidth + 10, displayHeight + 10))
-#	Draw the message bar
-pygame.draw.rect(screen, messageBar, (imageX - 5, imageY + 5 + displayHeight, displayWidth + 10, 20))
-pygame.display.update()
-
+#	Initialize the stuff
+MikeyBorgUI = MikeyBorgUIClass.MikeyBorgUI([screenWidth, screenHeight], [imageWidth, imageHeight])
 MikeyCam  = MikeyCamClass.MikeyCam([imageWidth, imageHeight])
 MikeyBorg = MikeyBorgClass.MikeyBorg()
 closeNow  = Value("b", 0)
@@ -48,8 +32,7 @@ def displayLoop(MikeyCam, close):
 		try:
 			while True:
 				image = MikeyCam.getImage([displayWidth, displayHeight])
-				screen.blit(image, [imageX, imageY])
-				pygame.display.update()
+				MikeyBorgUI.updateImage(image)
 				if close.value == 1:
 					break
 			MikeyCam.stop()
@@ -60,7 +43,6 @@ def displayLoop(MikeyCam, close):
 #	Function to manage the inputs and movement
 def inputLoop(MikeyBorg, close):
 	inputs = InputsClass.Inputs()
-	#try:
 	while True:
 		inputs.readInputs(pygame.event.get(), close)
 		if close.value == 1:
@@ -68,8 +50,6 @@ def inputLoop(MikeyBorg, close):
 		if inputs.hadEvent:
 			inputs.manageInputs(MikeyBorg)
 	MikeyBorg.motorsOff()
-	#except: KeyboardInterrupt:
-	#	MikeyBorg.motorsOff()
 
 displayProcess = Process(target=displayLoop, args=(MikeyCam,  closeNow,))
 inputProcess   = Process(target=inputLoop,   args=(MikeyBorg, closeNow,))
