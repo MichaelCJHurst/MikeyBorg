@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: Latin-1
 import pygame
+import time
 from   Classes         import InputsClass
 from   Classes         import MikeyBorgClass
 from   Classes         import MikeyCamClass
@@ -32,7 +33,8 @@ def displayLoop(MikeyCam, close):
 		try:
 			while True:
 				image = MikeyCam.getImage([displayWidth, displayHeight])
-				MikeyBorgUI.updateImage(image)
+				if not image == False:
+					MikeyBorgUI.updateImage(image)
 				if close.value == 1:
 					break
 			MikeyCam.stop()

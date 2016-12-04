@@ -13,6 +13,8 @@ class MikeyCam:
 		self.start()
 
 	def getImage(self, imageSize):
+		if not self.cam.query_image():
+			return False
 		image = self.cam.get_image()
 		image = pygame.transform.scale(image, imageSize)
 		return image
